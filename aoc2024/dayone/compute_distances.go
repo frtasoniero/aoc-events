@@ -23,6 +23,7 @@ func Run(path string) {
 	lineCount := 0
 	columnOne := make([]int, 0, 1000)
 	columnTwo := make([]int, 0, 1000)
+	columnTwoCount := make(map[int]int)
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -31,12 +32,7 @@ func Run(path string) {
 		numbers := strings.Fields(line)
 		columnOne = append(columnOne, convertToInt(numbers[0]))
 		columnTwo = append(columnTwo, convertToInt(numbers[1]))
-
-		fmt.Println(line)
-
-		// if lineCount >= 50 {
-		// 	break
-		// }
+		columnTwoCount[convertToInt(numbers[1])]++
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -46,13 +42,21 @@ func Run(path string) {
 	sort.Ints(columnOne)
 	sort.Ints(columnTwo)
 
-	result := 0.0
+	distanceResult := 0.0
 
 	for i := range len(columnOne) {
-		result += math.Abs(float64(columnOne[i] - columnTwo[i]))
+		distanceResult += math.Abs(float64(columnOne[i] - columnTwo[i]))
 	}
 
-	fmt.Println("Result:", result)
+	fmt.Println("Result of distances:", distanceResult)
+
+	similarityResult := 0
+
+	for i := range len(columnOne) {
+		similarityResult += columnOne[i] * columnTwoCount[columnOne[i]]
+	}
+
+	fmt.Println("Result of similarity:", similarityResult)
 }
 
 func convertToInt(number string) int {
