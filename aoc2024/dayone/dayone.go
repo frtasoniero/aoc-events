@@ -11,10 +11,11 @@ import (
 )
 
 func Run() error {
-	file, err := os.Open("./input.txt")
+	file, err := os.Open("./dayone/input.txt")
 
 	if err != nil {
 		fmt.Println("Error opening file:", err)
+		return err
 	}
 
 	defer file.Close()
@@ -46,6 +47,7 @@ func Run() error {
 
 	if err := scanner.Err(); err != nil {
 		fmt.Println("Error reading file:", err)
+		return err
 	}
 
 	sort.Ints(columnOne)
