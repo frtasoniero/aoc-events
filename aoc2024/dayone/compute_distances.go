@@ -10,8 +10,8 @@ import (
 	"strings"
 )
 
-func Run(path string) {
-	file, err := os.Open(path)
+func Run() error {
+	file, err := os.Open("./input.txt")
 
 	if err != nil {
 		fmt.Println("Error opening file:", err)
@@ -20,19 +20,28 @@ func Run(path string) {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	lineCount := 0
+
 	columnOne := make([]int, 0, 1000)
 	columnTwo := make([]int, 0, 1000)
 	columnTwoCount := make(map[int]int)
 
 	for scanner.Scan() {
 		line := scanner.Text()
-		lineCount++
 
 		numbers := strings.Fields(line)
-		columnOne = append(columnOne, convertToInt(numbers[0]))
-		columnTwo = append(columnTwo, convertToInt(numbers[1]))
-		columnTwoCount[convertToInt(numbers[1])]++
+
+		num1, err := strconv.Atoi(numbers[0])
+		if err != nil {
+			return fmt.Errorf("error converting number: %w", err)
+		}
+		num2, err := strconv.Atoi(numbers[1])
+		if err != nil {
+			return fmt.Errorf("error converting number: %w", err)
+		}
+
+		columnOne = append(columnOne, num1)
+		columnTwo = append(columnTwo, num2)
+		columnTwoCount[num2]++
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -52,21 +61,11 @@ func Run(path string) {
 
 	similarityResult := 0
 
-	for i := range len(columnOne) {
-		similarityResult += columnOne[i] * columnTwoCount[columnOne[i]]
+	for _, num := range columnOne {
+		similarityResult += num * columnTwoCount[num]
 	}
 
 	fmt.Println("Result of similarity:", similarityResult)
-}
 
-func convertToInt(number string) int {
-	numberStr := number
-	numberInt, err := strconv.Atoi(numberStr)
-
-	if err != nil {
-		fmt.Println("Error during conversion")
-		return -1
-	}
-
-	return numberInt
+	return nil
 }
