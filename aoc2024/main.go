@@ -4,11 +4,11 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/frtasoniero/aoc-events/aoc2024/dayone"
+	"github.com/frtasoniero/aoc-events/aoc2024/daytwo"
 )
 
 func main() {
-	if err := dayone.Run(); err != nil {
+	if err := daytwo.Run(); err != nil {
 		log.Fatalf("Error running dayone: %v", err)
 	}
 
