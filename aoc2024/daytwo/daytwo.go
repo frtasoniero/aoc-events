@@ -25,34 +25,14 @@ func Run() error {
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		isIncreasing := false
-		isDecreasing := false
 		isSafe := true
 
 		numbers := strings.Fields(line)
 
-		for i := 0; i < len(numbers)-1; i++ {
-			num1, err := strconv.Atoi(numbers[i])
-			if err != nil {
-				return fmt.Errorf("error converting number: %w", err)
-			}
+		isSafe, err = checkSafety(numbers, isSafe)
 
-			num2, err := strconv.Atoi(numbers[i+1])
-			if err != nil {
-				return fmt.Errorf("error converting number: %w", err)
-			}
-
-			if num1 < num2 {
-				isIncreasing = true
-			} else if num1 > num2 {
-				isDecreasing = true
-			}
-
-			if num1 == num2 || math.Abs(float64(num1-num2)) > 3 || isIncreasing == isDecreasing {
-				isSafe = false
-				safetyReport[false]++
-				break
-			}
+		if err != nil {
+			return fmt.Errorf("error checking safety: %w", err)
 		}
 
 		if isSafe {
@@ -67,4 +47,101 @@ func Run() error {
 	fmt.Println("Safety Report:", safetyReport)
 
 	return nil
+}
+
+func checkSafety(numbers []string, isSafe bool) (bool, error) {
+	isIncreasing := false
+	isDecreasing := false
+
+	for i := 0; i < len(numbers)-1; i++ {
+		num1, err := strconv.Atoi(numbers[i])
+		if err != nil {
+			return false, err
+		}
+
+		num2, err := strconv.Atoi(numbers[i+1])
+		if err != nil {
+			return false, err
+		}
+
+		if num1 < num2 {
+			isIncreasing = true
+		} else if num1 > num2 {
+			isDecreasing = true
+		}
+
+		if num1 == num2 || math.Abs(float64(num1-num2)) > 3 {
+			if isSafe {
+				numbersCopy := make([]string, len(numbers))
+				copy(numbersCopy, numbers)
+
+				numbers1 := append(numbersCopy[:i], numbersCopy[i+1:]...)
+				check1, err1 := checkSafety(numbers1, false)
+
+				if err1 != nil {
+					return false, err1
+				}
+
+				numbersCopy = make([]string, len(numbers))
+				copy(numbersCopy, numbers)
+
+				numbers2 := append(numbersCopy[:i+1], numbersCopy[i+2:]...)
+				check2, err2 := checkSafety(numbers2, false)
+
+				if err2 != nil {
+					return false, err2
+				}
+
+				if check1 || check2 {
+					return true, nil
+				} else {
+					return false, nil
+				}
+			}
+
+			return false, nil
+		} else if isIncreasing == isDecreasing {
+			if isSafe {
+				numbersCopy := make([]string, len(numbers))
+				copy(numbersCopy, numbers)
+
+				numbers0 := append(numbersCopy[:i-1], numbersCopy[i:]...)
+				check0, err0 := checkSafety(numbers0, false)
+
+				if err0 != nil {
+					return false, err0
+				}
+
+				numbersCopy = make([]string, len(numbers))
+				copy(numbersCopy, numbers)
+
+				numbers1 := append(numbersCopy[:i], numbersCopy[i+1:]...)
+				check1, err1 := checkSafety(numbers1, false)
+
+				if err1 != nil {
+					return false, err1
+				}
+
+				numbersCopy = make([]string, len(numbers))
+				copy(numbersCopy, numbers)
+
+				numbers2 := append(numbersCopy[:i+1], numbersCopy[i+2:]...)
+				check2, err2 := checkSafety(numbers2, false)
+
+				if err2 != nil {
+					return false, err2
+				}
+
+				if check0 || check1 || check2 {
+					return true, nil
+				} else {
+					return false, nil
+				}
+			}
+
+			return false, nil
+		}
+	}
+
+	return true, nil
 }
