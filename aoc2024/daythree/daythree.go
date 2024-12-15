@@ -6,6 +6,7 @@ import (
 	"os"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 func Run() error {
@@ -19,28 +20,32 @@ func Run() error {
 	defer file.Close()
 
 	scanner := bufio.NewScanner(file)
-	regexWords := regexp.MustCompile(`mul\(\d{1,3},\d{1,3}\)`)
-	regexNumbers := regexp.MustCompile("[0-9]+")
-	var multiplicationsResult float64 = 0.0
+
+	var fileInformation strings.Builder
+
+	var multiplicationsResult int64 = 0.0
 
 	for scanner.Scan() {
 		line := scanner.Text()
 
-		matches := regexWords.FindAllString(line, -1)
-		for _, match := range matches {
-			numbers := regexNumbers.FindAllString(match, -1)
+		fileInformation.WriteString(line)
+	}
 
-			num1, err := strconv.Atoi(numbers[0])
-			if err != nil {
-				return fmt.Errorf("error converting number: %w", err)
-			}
-			num2, err := strconv.Atoi(numbers[1])
-			if err != nil {
-				return fmt.Errorf("error converting number: %w", err)
-			}
+	doSeparator := "do()"
+	dontSeparator := "don't()"
 
-			multiplicationsResult = multiplicationsResult + (float64(num1) * float64(num2))
+	splitByDo := strings.Split(fileInformation.String(), doSeparator)
+
+	for _, do := range splitByDo {
+		splitByDont := strings.Split(do, dontSeparator)
+
+		result, err := computeMulFromString(splitByDont[0])
+
+		if err != nil {
+			fmt.Println("Error computing mul:", err)
+			return err
 		}
+		multiplicationsResult += result
 	}
 
 	if err := scanner.Err(); err != nil {
@@ -51,4 +56,31 @@ func Run() error {
 	fmt.Println("Multiplications result:", multiplicationsResult)
 
 	return nil
+}
+
+func computeMulFromString(line string) (int64, error) {
+	regexMulWord := regexp.MustCompile(`mul\(\d{1,3},\d{1,3}\)`)
+	regexNumbers := regexp.MustCompile("[0-9]+")
+
+	matchesMul := regexMulWord.FindAllString(line, -1)
+
+	var result int64 = 0.0
+
+	for _, match := range matchesMul {
+
+		numbers := regexNumbers.FindAllString(match, -1)
+
+		num1, err := strconv.Atoi(numbers[0])
+		if err != nil {
+			return 0, fmt.Errorf("error converting number: %w", err)
+		}
+		num2, err := strconv.Atoi(numbers[1])
+		if err != nil {
+			return 0, fmt.Errorf("error converting number: %w", err)
+		}
+
+		result += (int64(num1) * int64(num2))
+	}
+
+	return result, nil
 }
