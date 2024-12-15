@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/frtasoniero/aoc-events/aoc2024/daytwo"
+	"github.com/frtasoniero/aoc-events/aoc2024/daythree"
 )
 
 func main() {
-	if err := daytwo.Run(); err != nil {
+	if err := daythree.Run(); err != nil {
 		log.Fatalf("Error running dayone: %v", err)
 	}
 
-	fmt.Println("Day one completed successfully")
+	fmt.Println("Day three completed successfully")
 }
